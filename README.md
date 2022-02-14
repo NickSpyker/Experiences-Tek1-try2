@@ -1,2 +1,2 @@
-# Boursor Algo NS
+### Boursor Algo
 ![img](img.png)
