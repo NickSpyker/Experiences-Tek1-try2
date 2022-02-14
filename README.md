@@ -1,2 +1,2 @@
 ### Boursor Algo:
-![img](img.png)
+![img](data/img.png)
