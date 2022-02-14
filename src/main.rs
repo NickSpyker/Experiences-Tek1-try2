@@ -66,6 +66,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut loop_it: i32 = 0;
     let loop_max: i32 = 10;
 
+    // Struct
+    let mut data_s: Data;
+    let mut candle_s: Candle;
+
     // HTML request historic
     let mut data: std::string::String = reqwest::blocking::get("https://bourse.boursorama.com/bourse/action/graph/ws/GetTicksEOD?symbol=1rPRNO&length=1&period=0&guid=")?.text()?;
     println!("|| HTML request - Data   OK !");
@@ -85,14 +89,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Fill data structs
     let data_buffer = fs::read_to_string("data.json")
         .expect("Something went wrong reading the file");
-    let json: serde_json::Value =
-        serde_json::from_str(&data_buffer).expect("JSON was not well-formatted");
 
     // Fill candle structs
-    let new_buffer = fs::read_to_string("out.json")
+    let out_buffer = fs::read_to_string("out.json")
         .expect("Something went wrong reading the file");
-    let json: serde_json::Value =
-        serde_json::from_str(&new_buffer).expect("JSON was not well-formatted");
 
     print!("|| Start algo ? ([y]es/[n]o) : ");
     // If input == n (no), read_io = true -> exit
