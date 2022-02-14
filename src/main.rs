@@ -16,10 +16,11 @@ use std::io;
 use chrono;
 
 fn read_io() -> bool {
-    io::stdout().flush().unwrap();
-    let mut input = String::new();
     let start: String = String::from("y");
     let stop: String = String::from("n");
+
+    io::stdout().flush().unwrap();
+    let mut input = String::new();
 
     // Get input
     io::stdin().read_line(&mut input);
