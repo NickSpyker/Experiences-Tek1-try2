@@ -15,6 +15,38 @@ use std::fs;
 use std::io;
 use chrono;
 
+// Candle struct
+struct Candle {
+    d: i32,
+    o: i32,
+    h: i32,
+    l: i32,
+    c: i32,
+    v: i32,
+}
+
+// Historic struct
+struct Data {
+    name: String,
+    symbol_id: String,
+    x_period: i32,
+    qv: Candle,
+    qd: Candle,
+    // Number of Candle type element = 327 (in data.json) :
+    quote_tab: [Candle; 327],
+}
+
+// Struct for out.json data
+struct Out {
+    o: i32,
+    h: i32,
+    l: i32,
+    c: i32,
+    v: i32,
+    var: i32,
+    qt: [Candle; 2],
+}
+
 fn read_io() -> bool {
     let start: String = String::from("y");
     let stop: String = String::from("n");
@@ -35,11 +67,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let loop_max: i32 = 10;
 
     // HTML request historic
-    let data = reqwest::blocking::get("https://bourse.boursorama.com/bourse/action/graph/ws/GetTicksEOD?symbol=1rPRNO&length=1&period=0&guid=")?.text()?;
+    let mut data: std::string::String = reqwest::blocking::get("https://bourse.boursorama.com/bourse/action/graph/ws/GetTicksEOD?symbol=1rPRNO&length=1&period=0&guid=")?.text()?;
     println!("|| HTML request - Data   OK !");
 
     // HTML request now
-    let mut buffer = reqwest::blocking::get("https://bourse.boursorama.com/bourse/action/graph/ws/UpdateCharts?symbol=1rPRNO&period=-1")?.text()?;
+    let mut buffer: std::string::String = reqwest::blocking::get("https://bourse.boursorama.com/bourse/action/graph/ws/UpdateCharts?symbol=1rPRNO&period=-1")?.text()?;
     println!("|| HTML request - Buffer OK !");
 
     // Write historical data
@@ -50,7 +82,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     fs::write("out.json", buffer).expect("Unable to write file");
     println!("|| out.json     - loaded");
 
+    // Fill data structs
+    let data_buffer = fs::read_to_string("data.json")
+        .expect("Something went wrong reading the file");
+    let json: serde_json::Value =
+        serde_json::from_str(&data_buffer).expect("JSON was not well-formatted");
+
+    // Fill candle structs
+    let new_buffer = fs::read_to_string("out.json")
+        .expect("Something went wrong reading the file");
+    let json: serde_json::Value =
+        serde_json::from_str(&new_buffer).expect("JSON was not well-formatted");
+
     print!("|| Start algo ? ([y]es/[n]o) : ");
+    // If input == n (no), read_io = true -> exit
     if read_io() {
         println!("|| STOP.");
     } else {
@@ -65,6 +110,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             fs::write("out.json", buffer).expect("Unable to write file");
             println!(" -> out.json loaded | {:?}", chrono::offset::Local::now());
             loop_it += 1;
+
             // Sleep for [x] secs
             thread::sleep(Duration::from_secs(5));
         }
